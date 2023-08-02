@@ -1,0 +1,13 @@
+description: llmserve-notebook
+environment:
+  proxy_ports:
+    - proxy_port: 7791
+      proxy_tcp: true
+      unauthenticated: true
+resources:
+  slots: 2
+bind_mounts:
+  - host_path: /home/nfs_data
+    container_path: /root
+idle_timeout: 30m
+
