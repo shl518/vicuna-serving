@@ -4,10 +4,16 @@ environment:
     - proxy_port: 7791
       proxy_tcp: true
       unauthenticated: true
+  image:
+    cpu: determinedai/environments:cuda-11.8-pytorch-2.0-gpu-0.24.0
+    gpu: determinedai/environments:cuda-11.8-pytorch-2.0-gpu-0.24.0
 resources:
   slots: 2
+  resource_pool: RTX4090
 bind_mounts:
+  - host_path: /home/nfs_data_02
+    container_path: /root1
   - host_path: /home/nfs_data
-    container_path: /root
+    container_path: /root2
 idle_timeout: 30m
 
