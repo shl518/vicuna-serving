@@ -15,10 +15,10 @@ import deepspeed
 from fastchat.model import get_conversation_template
 from time import perf_counter
 
-ORIG_MODEL_LLAMA2_7 = '/root1/llama2/llama-2-7b-hf'
+ORIG_MODEL_LLAMA2_7 = "/root1/llama2/llama-2-7b-chat-hf"
 ORIG_MODEL_VICUNA7_v3 = "/root2/models/vicuna/vicuna-7b/vicuna-7b-v1.3"
 ORIG_MODEL_VICUNA13_v3 = "/root2/models/vicuna/vicuna-13b/vicuna-13b-v1.3"
-ORIG_MODEL_LLAMA2_13 = "/root1/llama2/llama-2-7b-chat-hf"
+ORIG_MODEL_LLAMA2_13 = "/root1/llama2/llama-2-13b-chat-hf"
 WORLD_SIZE = 2
 model_path = ORIG_MODEL_LLAMA2_13
 device = 'cuda'
