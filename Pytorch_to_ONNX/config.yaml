@@ -1,9 +1,5 @@
 description: llmserve-notebook
 environment:
-  proxy_ports:
-    - proxy_port: 7791
-      proxy_tcp: true
-      unauthenticated: true
   image:
     cpu: determinedai/environments:cuda-11.8-pytorch-2.0-gpu-0.24.0
     gpu: determinedai/environments:cuda-11.8-pytorch-2.0-gpu-0.24.0

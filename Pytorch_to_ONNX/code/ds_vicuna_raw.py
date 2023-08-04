@@ -5,6 +5,7 @@ from utils import get_gpu_memory
 import torch
 from loguru import logger
 import os
+import numpy as np
 from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
@@ -12,11 +13,34 @@ from transformers import (
 )
 import deepspeed
 from fastchat.model import get_conversation_template
-ORIG_MODEL_LLAMA2 = '/root1/llama2/llama-2-7b-hf'
-ORIG_MODEL_VICUNA_v3 = "/root2/models/vicuna/vicuna-7b/vicuna-7b-v1.3"
+from time import perf_counter
+
+ORIG_MODEL_LLAMA2_7 = '/root1/llama2/llama-2-7b-hf'
+ORIG_MODEL_VICUNA7_v3 = "/root2/models/vicuna/vicuna-7b/vicuna-7b-v1.3"
+ORIG_MODEL_VICUNA13_v3 = "/root2/models/vicuna/vicuna-13b/vicuna-13b-v1.3"
+ORIG_MODEL_LLAMA2_13 = "/root1/llama2/llama-2-7b-chat-hf"
 WORLD_SIZE = 2
-model_path = ORIG_MODEL_LLAMA2
+model_path = ORIG_MODEL_LLAMA2_13
 device = 'cuda'
+
+
+def measure_latency(model, tokenizer, payload, generation_args, device):
+    input_ids = tokenizer(payload, return_tensors="pt").input_ids.to(device)
+    latencies = []
+    # warm up
+    for _ in range(2):
+        _ = model.generate(input_ids, **generation_args)
+    # Timed run
+    for _ in range(10):
+        start_time = perf_counter()
+        _ = model.generate(input_ids, **generation_args)
+        latency = perf_counter() - start_time
+        latencies.append(latency)
+    # Compute run statistics
+    time_avg_ms = 1000 * np.mean(latencies)
+    time_std_ms = 1000 * np.std(latencies)
+    time_p95_ms = 1000 * np.percentile(latencies, 95)
+    return f"P95 latency (ms) - {time_p95_ms}; Average latency (ms) - {time_avg_ms:.2f} +\- {time_std_ms:.2f};", time_p95_ms
 
 
 def load_origin_model(
@@ -66,28 +90,26 @@ msg = "Hello my name is Philipp."
 conv = get_conversation_template(model_path)
 conv.append_message(conv.roles[0], msg)
 conv.append_message(conv.roles[1], None)
-prompt = conv.get_prompt()
+# prompt = conv.get_prompt()
+prompt = msg
 inputs = tokenizer([prompt])
-inputs = {k: torch.tensor(v).to(device) for k, v in inputs.items()}
+print(model.device)
+
 
 print(f"input prompt: \n \n{prompt}")
 print(f'Payload sequence length is: {len(tokenizer(prompt)["input_ids"])}')
 # use deepspeed wrap
 
-# ds_model = deepspeed.init_inference(
-#     model=model,      # Transformers models
-#     mp_size=WORLD_SIZE,        # Number of GPU
-#     dtype=torch.float16,  # dtype of the weights (fp16)
-#     replace_with_kernel_inject=True,  # replace the model with the kernel injector
-# )
 ds_model = deepspeed.init_inference(
     model=model,
     replace_with_kernel_inject=True,
+    replace_method="auto",
     mp_size=WORLD_SIZE,
     dtype=torch.float16,
 )
 print(f"model is loaded on device {ds_model.module.device}")
-
+inputs = {k: torch.tensor(v).to(ds_model.module.device)
+          for k, v in inputs.items()}
 ds_logits = ds_model.generate(**inputs,
                               do_sample=True if CONFIG['temperature'] > 1e-5 else False,
                               temperature=CONFIG['temperature'],
