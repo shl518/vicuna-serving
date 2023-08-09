@@ -14,14 +14,16 @@ ORIG_MODEL_LLAMA2_7 = "/root1/llama2/llama-2-7b-chat-hf"
 ORIG_MODEL_VICUNA7_v3 = "/root2/models/vicuna/vicuna-7b/vicuna-7b-v1.3"
 ORIG_MODEL_VICUNA13_v3 = "/root2/models/vicuna/vicuna-13b/vicuna-13b-v1.3"
 ORIG_MODEL_LLAMA2_13 = "/root1/llama2/llama-2-13b-chat-hf"
-
+ORIG_MODEL_YuLan_13b = "/root1/YuLan-Chat-2-13b-fp16"
+ORIG_MODEL_VICUNA33_v3 = "/root2/models/vicuna/vicuna-33b/vicuna-33b-v1.3"
+ORIG_MODEL_LLAMA2_70 = "/root1/llama2/llama-2-70b-chat-hf"
 # settings
-WORLD_SIZE = 2
+WORLD_SIZE = 4
 benchmark_cycles = 10
-model_path = ORIG_MODEL_LLAMA2_13
+model_path = ORIG_MODEL_LLAMA2_7
 device = 'cuda'
 ds = True
-prompt = "Hello my name is Philipp."
+prompt = "Hello, my name is Philipp."
 CONFIG = {"temperature": 0.7, "repetition_penalty": 1.0,
           "top_p": 1, "top_k": -1, "max_new_tokens": 1024}
 
@@ -79,8 +81,7 @@ def load_model(
             model=model,
             replace_with_kernel_inject=True,
             replace_method="auto",
-            mp_size=WORLD_SIZE,
-            dtype=torch.float16,
+            mp_size=WORLD_SIZE
         )
     else:
         model.to(device)

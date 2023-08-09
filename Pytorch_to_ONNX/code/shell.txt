@@ -1,0 +1,10 @@
+python accelerate_vicuna_raw.py --name /root1/llama2/llama-2-7b-chat-hf --batch_size 1 --benchmark 2>&1 | tee bloom-accelerate-inference_bs=1.txt
+
+Name: torchaudio
+Version: 0.12.0+cu113
+
+Name: torchvision
+Version: 0.13.0+cu113
+
+Name: torch
+Version: 1.12.0+cu113

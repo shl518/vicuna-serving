@@ -1,10 +1,10 @@
 description: llmserve-notebook
 environment:
   image:
-    cpu: determinedai/environments:cuda-11.3-pytorch-1.12-gpu-mpi-0.24.0
-    gpu: determinedai/environments:cuda-11.3-pytorch-1.12-gpu-mpi-0.24.0
+    cpu: determinedai/environments:cuda-11.8-pytorch-2.0-gpu-0.24.0
+    gpu: determinedai/environments:cuda-11.8-pytorch-2.0-gpu-0.24.0
 resources:
-  slots: 2
+  slots: 1
   resource_pool: RTXA6000
 bind_mounts:
   - host_path: /home/nfs_data_02
